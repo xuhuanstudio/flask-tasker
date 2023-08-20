@@ -38,7 +38,7 @@ setuptools.setup(
     description="Simplify task management in flask applications.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/xuhuanstudio/flask-task",
+    url="https://github.com/xuhuanstudio/flask-tasker",
     include_package_data=True,
     package_data={"": []},
     packages=setuptools.find_packages(),

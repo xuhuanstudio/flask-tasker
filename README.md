@@ -23,20 +23,21 @@ from flask_socketio import SocketIO
 
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+CORS(app, origins='*')
 socketio = SocketIO(app, cors_allowed_origins="*")
 flask_tasker = FlaskTasker(app, socketio)
 
 flags = {}
 
+
 @flask_tasker.dispose()
-def dispose(task_id, on_progress, on_success, on_error, on_terminate):
+def dispose(task_id, request, on_progress, on_success, on_error, on_terminate):
 
     flags[task_id] = False
 
     # Simulate task progress.
     import time
-    count = 10
+    count = request.json.get('count')
 
     for i in range(count):
         if flags[task_id]:
@@ -56,7 +57,8 @@ def dispose(task_id, on_progress, on_success, on_error, on_terminate):
 
 @flask_tasker.terminate()
 def terminate(task_id):
-    flags[task_id] = True
+    if task_id in flags:
+        flags[task_id] = True
 
 
 if __name__ == '__main__':
@@ -69,12 +71,14 @@ if __name__ == '__main__':
 import axios from "axios";
 import {io} from "socket.io-client";
 
-axios.post('http://localhost:3000/dispose').then(res => {
+const rootUrl = 'http://localhost:3000';
+
+axios.post(`${rootUrl}/dispose`, {count: 10}).then(res => {
 
     const task_id = res.data.task_id;
     console.log('task_id', task_id);
 
-    io('http://localhost:3000/status', {query: {task_id}})
+    io(`${rootUrl}/status`, {query: {task_id}})
         .on('success', res => console.log('on success', res))
         .on('error', res => console.error('on error', res))
         .on('terminate', res => console.log('on terminate', res))
@@ -82,7 +86,7 @@ axios.post('http://localhost:3000/dispose').then(res => {
             console.log('on progress', res);
             // Simulate task termination.
             if (Math.random() < 0.08) {
-                axios.post('http://localhost:3000/terminate', {task_id})
+                axios.post(`${rootUrl}/terminate`, {task_id})
                     .then(res => console.log('terminate', res.data))
                     .catch(console.error);
             }

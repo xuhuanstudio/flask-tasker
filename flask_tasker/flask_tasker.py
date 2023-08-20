@@ -1,3 +1,4 @@
+import copy
 import uuid
 import threading
 
@@ -37,7 +38,7 @@ class FlaskTasker():
 
             @self.app.route(rule, methods=methods)
             def task_dispose_route():
-
+                _request = copy.copy(request)
                 task_id = str(uuid.uuid4())
                 base_data = {'task_id': task_id}
                 task_lock = threading.Lock() if use_lock else None
@@ -62,10 +63,10 @@ class FlaskTasker():
 
                 def thread_target():
                     if task_lock is None:
-                        result = func(task_id, on_progress, on_success, on_error, on_terminate)
+                        result = func(task_id, _request, on_progress, on_success, on_error, on_terminate)
                     else:
                         with task_lock:
-                            result = func(task_id, on_progress, on_success, on_error, on_terminate)
+                            result = func(task_id, _request, on_progress, on_success, on_error, on_terminate)
                             
                 threading.Thread(target=thread_target).start()
                 return result if result is not None else base_data
@@ -78,9 +79,10 @@ class FlaskTasker():
         terminate task
         """
         def decorator(func):
+
             @self.app.route(rule, methods=methods)
             def task_terminate_route():
-                task_id = request.json.get('task_id') if request.method == 'POST' else request.args.get('task_id')
+                task_id = request.json.get('task_id', request.form.get('task_id', request.args.get('task_id')))
                 result = func(task_id)
                 return result if result is not None else {'task_id': task_id}
             
