@@ -1,7 +1,5 @@
 .DS_Store
-.vscode/*
-.idea/*
-__pycache__/*
-flask_tasker/__pycache__/*
-dist/*
-Flask_Tasker.egg-info/*
+__pycache__
+flask_tasker/__pycache__
+dist
+Flask_Tasker.egg-info

@@ -1,2 +1,2 @@
-flask==2.3.2
-flask_socketio==5.3.5
+flask
+flask_socketio

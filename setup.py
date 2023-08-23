@@ -1,3 +1,4 @@
+import shutil
 import setuptools
 import os
 import codecs
@@ -17,6 +18,9 @@ def get_version(rel_path):
     else:
         raise RuntimeError('Unable to find version string.')
 
+
+shutil.rmtree('dist', ignore_errors=True)
+shutil.rmtree('Flask_Tasker.egg-info', ignore_errors=True)
 
 FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
